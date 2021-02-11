@@ -29,7 +29,7 @@ def processFile(filePath, skipA3Warnings=True):
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
     try:
         ret = proc.wait(6)
-    except Exception as e:
+    except Exception as _e:
         print("sqfvm timed out: {}".format(filePath))
         return True
 
@@ -52,18 +52,18 @@ def processFile(filePath, skipA3Warnings=True):
 
 def main():
     error_count = 0
-    sqf_files = []
-    for root, dirs, files in os.walk(basePath, "addons"):
+    arma_files = []
+    for root, _dirs, files in os.walk(basePath):
         for file in files:
-            if file.endswith(".sqf"):  # or file == "config.cpp":
+            if file.endswith(".sqf") or file == "config.cpp":
                 filePath = os.path.join(root, file)
-                sqf_files.append(filePath)
+                arma_files.append(filePath)
     with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-        for fileError in executor.map(processFile, sqf_files):
+        for fileError in executor.map(processFile, arma_files):
             if fileError:
                 error_count += 1
 
-    print("Checked {} SQF - errors: {}".format(len(sqf_files), error_count))
+    print("Checked {} files - errors: {}".format(len(arma_files), error_count))
     return error_count
 
 
